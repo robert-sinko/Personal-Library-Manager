@@ -1,7 +1,7 @@
 import { AppBar, Box, Toolbar, Typography } from "@mui/material";
-import { Outlet } from "react-router-dom";
+import List from "./List";
 
-export default function Layout() {
+export default function App() {
   return (
     <Box
       display={"flex"}
@@ -27,7 +27,7 @@ export default function Layout() {
           background: "#fafafa",
         }}
       >
-        <Outlet />
+        <List />
       </Box>
       <Box>
         <Typography p={3}>Coded by Robert</Typography>
