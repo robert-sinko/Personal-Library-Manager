@@ -92,7 +92,7 @@ function List() {
   };
 
   return (
-    <Box width={1}>
+    <Box p={3}>
       <Box display={"flex"} alignItems={"center"}>
         <Typography flexGrow={1}>All Books</Typography>
         <Button variant="outlined" onClick={openModalAdd}>
@@ -101,13 +101,29 @@ function List() {
       </Box>
       <Box pt={3}>
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <Table aria-label="simple table">
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
                 <TableCell>Author</TableCell>
-                <TableCell>Genre</TableCell>
-                <TableCell>Description</TableCell>
+                <Box
+                  component={TableCell}
+                  display={{
+                    xs: "none",
+                    sm: "table-cell",
+                  }}
+                >
+                  Genre
+                </Box>
+                <Box
+                  component={TableCell}
+                  display={{
+                    xs: "none",
+                    md: "table-cell",
+                  }}
+                >
+                  Description
+                </Box>
                 <TableCell
                   sx={{
                     width: "64px",
@@ -143,8 +159,24 @@ function List() {
                       </Link>
                     </TableCell>
                     <TableCell>{row.author}</TableCell>
-                    <TableCell>{row.genre}</TableCell>
-                    <TableCell>{row.description}</TableCell>
+                    <Box
+                      component={TableCell}
+                      display={{
+                        xs: "none",
+                        sm: "table-cell",
+                      }}
+                    >
+                      {row.genre}
+                    </Box>
+                    <Box
+                      component={TableCell}
+                      display={{
+                        xs: "none",
+                        md: "table-cell",
+                      }}
+                    >
+                      {row.description}
+                    </Box>
                     <TableCell>
                       <Button size="small" onClick={() => handleDelete(row.id)}>
                         🗑️
