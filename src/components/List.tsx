@@ -1,7 +1,7 @@
 import {
   Box,
   Button,
-  Link as MuiLink,
+  Link,
   Paper,
   Table,
   TableBody,
@@ -11,9 +11,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import useSWR from "swr";
-import { addBook, deleteBook, getBooks } from "../api";
+import { addBook, deleteBook, getBooks, updateBook } from "../api";
 import { TableLoading } from "./TableLoading";
 import { Book } from "../types/Book";
 import { useState } from "react";
@@ -21,7 +20,7 @@ import { EditModalState } from "../types/EditModal";
 import EditModal from "./EditModal";
 
 function List() {
-  const { data, isLoading, mutate } = useSWR("books", getBooks);
+  const { data, isLoading, mutate } = useSWR<Book[]>("books", getBooks);
   const [editModal, setEditModal] = useState<EditModalState>({
     book: {
       author: "",
@@ -33,16 +32,35 @@ function List() {
     opened: false,
   });
 
-  const deleteItem = async (id?: null | number) => {
-    const book = data && data.find((book: Book) => book.id === id);
-    if (!book) {
-      alert("Book not found");
-      return;
-    }
-    if (confirm("Are you sure you want to delete " + book.title + "?")) {
-      await deleteBook(book.id);
-      mutate(data.filter((item: Book) => item.id !== book.id));
-    }
+  const openModalAdd = () => {
+    setEditModal({
+      book: {
+        author: "",
+        description: "",
+        genre: "",
+        id: null,
+        title: "",
+      },
+      opened: true,
+    });
+  };
+  const openModalEdit = (book: Book) => {
+    setEditModal({
+      book: book,
+      opened: true,
+    });
+  };
+  const closeModal = () => {
+    setEditModal({
+      book: {
+        author: "",
+        description: "",
+        genre: "",
+        id: null,
+        title: "",
+      },
+      opened: false,
+    });
   };
 
   const handleSubmit = async (input: Book) => {
@@ -53,18 +71,31 @@ function List() {
       data.push(newBook);
       await addBook(newBook);
       mutate(data);
+    } else {
+      const index = data.findIndex((item) => item.id === input.id);
+      data[index] = input;
+      await updateBook(newBook);
+      mutate(data);
     }
     setEditModal({ ...editModal, opened: false });
+  };
+  const handleDelete = async (id?: null | number) => {
+    const book = data && data.find((book: Book) => book.id === id);
+    if (!book || !book.id) {
+      alert("Book not found");
+      return;
+    }
+    if (confirm("Are you sure you want to delete " + book.title + "?")) {
+      await deleteBook(book.id);
+      mutate(data.filter((item: Book) => item.id !== book.id));
+    }
   };
 
   return (
     <Box width={1}>
       <Box display={"flex"} alignItems={"center"}>
         <Typography flexGrow={1}>All Books</Typography>
-        <Button
-          variant="outlined"
-          onClick={() => setEditModal({ ...editModal, opened: true })}
-        >
+        <Button variant="outlined" onClick={openModalAdd}>
           add
         </Button>
       </Box>
@@ -102,15 +133,20 @@ function List() {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell component="th" scope="row">
-                      <MuiLink component={Link} to={"/edit/" + row.id}>
+                      <Link
+                        onClick={() => openModalEdit(row)}
+                        sx={{
+                          cursor: "pointer",
+                        }}
+                      >
                         {row.title}
-                      </MuiLink>
+                      </Link>
                     </TableCell>
                     <TableCell>{row.author}</TableCell>
                     <TableCell>{row.genre}</TableCell>
                     <TableCell>{row.description}</TableCell>
                     <TableCell>
-                      <Button size="small" onClick={() => deleteItem(row.id)}>
+                      <Button size="small" onClick={() => handleDelete(row.id)}>
                         🗑️
                       </Button>
                     </TableCell>
@@ -123,8 +159,9 @@ function List() {
       </Box>
       {editModal.opened && (
         <EditModal
-          handleClose={() => setEditModal({ ...editModal, opened: false })}
-          handleSubmit={handleSubmit}
+          book={editModal.book}
+          closeModal={closeModal}
+          submit={handleSubmit}
         />
       )}
     </Box>

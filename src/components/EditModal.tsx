@@ -14,20 +14,16 @@ const style = {
 };
 
 function EditModal({
-  handleClose,
-  handleSubmit,
+  book,
+  closeModal,
+  submit,
 }: {
-  handleClose: () => void;
-  handleSubmit: (input: Book) => void;
+  book: Book;
+  closeModal: () => void;
+  submit: (input: Book) => void;
 }) {
   const formik = useFormik({
-    initialValues: {
-      id: null,
-      title: "",
-      author: "",
-      genre: "",
-      description: "",
-    },
+    initialValues: { ...book },
     validate: (values) => {
       const errors: {
         title?: string;
@@ -43,25 +39,25 @@ function EditModal({
       return errors;
     },
     onSubmit: (values) => {
-      handleSubmit(values);
+      submit(values);
     },
   });
 
-  const closeModal = () => {
+  const handleClose = () => {
     if (formik.dirty) {
       if (
         confirm("Values not saved, are you sure you want to close the modal?")
       )
-        handleClose();
+        closeModal();
     } else {
-      handleClose();
+      closeModal();
     }
   };
 
   return (
     <Modal
       open={true}
-      onClose={closeModal}
+      onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -122,7 +118,10 @@ function EditModal({
             />
           </Box>
           <Box width={1} textAlign="right" pt={2}>
-            <Button disabled={formik.isSubmitting} type="submit">
+            <Button
+              disabled={!formik.isValid || formik.isSubmitting}
+              type="submit"
+            >
               Submit
             </Button>
           </Box>
