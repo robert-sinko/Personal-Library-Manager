@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Modal, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
+import { Book } from "../types/Book";
 
 const style = {
   position: "absolute",
@@ -12,9 +13,16 @@ const style = {
   p: 4,
 };
 
-function EditModal({ handleClose }: { handleClose: () => void }) {
+function EditModal({
+  handleClose,
+  handleSubmit,
+}: {
+  handleClose: () => void;
+  handleSubmit: (input: Book) => void;
+}) {
   const formik = useFormik({
     initialValues: {
+      id: null,
       title: "",
       author: "",
       genre: "",
@@ -34,11 +42,8 @@ function EditModal({ handleClose }: { handleClose: () => void }) {
       }
       return errors;
     },
-    onSubmit: (values, { setSubmitting }) => {
-      setTimeout(() => {
-        alert(JSON.stringify(values, null, 2));
-        setSubmitting(false);
-      }, 400);
+    onSubmit: (values) => {
+      handleSubmit(values);
     },
   });
 

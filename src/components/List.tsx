@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import useSWR from "swr";
-import fetcher from "../fetcher";
+import { addBook, deleteBook, getBooks } from "../api";
 import { TableLoading } from "./TableLoading";
 import { Book } from "../types/Book";
 import { useState } from "react";
@@ -21,25 +21,40 @@ import { EditModalState } from "../types/EditModal";
 import EditModal from "./EditModal";
 
 function List() {
-  const { data, isLoading } = useSWR("books", fetcher);
+  const { data, isLoading, mutate } = useSWR("books", getBooks);
   const [editModal, setEditModal] = useState<EditModalState>({
     book: {
       author: "",
       description: "",
       genre: "",
-      id: "",
+      id: null,
       title: "",
     },
     opened: false,
   });
 
-  const deleteItem = (id: string) => {
-    const book = data.find((book: Book) => book.id === id);
+  const deleteItem = async (id?: null | number) => {
+    const book = data && data.find((book: Book) => book.id === id);
     if (!book) {
       alert("Book not found");
       return;
     }
-    confirm("Are you sure you want to delete " + book.title + "?");
+    if (confirm("Are you sure you want to delete " + book.title + "?")) {
+      await deleteBook(book.id);
+      mutate(data.filter((item: Book) => item.id !== book.id));
+    }
+  };
+
+  const handleSubmit = async (input: Book) => {
+    if (!data) return;
+    const newBook = { ...input };
+    if (input.id === null) {
+      newBook.id = Date.now();
+      data.push(newBook);
+      await addBook(newBook);
+      mutate(data);
+    }
+    setEditModal({ ...editModal, opened: false });
   };
 
   return (
@@ -69,14 +84,16 @@ function List() {
                 ></TableCell>
               </TableRow>
             </TableHead>
-            {isLoading ? (
+            {isLoading || !data ? (
               <TableLoading />
             ) : !data.length ? (
-              <TableRow>
-                <TableCell colSpan={5}>
-                  <Typography textAlign={"center"}>no books</Typography>
-                </TableCell>
-              </TableRow>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Typography textAlign={"center"}>no books</Typography>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
             ) : (
               <TableBody>
                 {data.map((row: Book) => (
@@ -107,6 +124,7 @@ function List() {
       {editModal.opened && (
         <EditModal
           handleClose={() => setEditModal({ ...editModal, opened: false })}
+          handleSubmit={handleSubmit}
         />
       )}
     </Box>
