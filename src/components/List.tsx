@@ -16,9 +16,22 @@ import useSWR from "swr";
 import fetcher from "../fetcher";
 import { TableLoading } from "./TableLoading";
 import { Book } from "../types/Book";
+import { useState } from "react";
+import { EditModalState } from "../types/EditModal";
+import EditModal from "./EditModal";
 
 function List() {
   const { data, isLoading } = useSWR("books", fetcher);
+  const [editModal, setEditModal] = useState<EditModalState>({
+    book: {
+      author: "",
+      description: "",
+      genre: "",
+      id: "",
+      title: "",
+    },
+    opened: false,
+  });
 
   const deleteItem = (id: string) => {
     const book = data.find((book: Book) => book.id === id);
@@ -33,7 +46,10 @@ function List() {
     <Box width={1}>
       <Box display={"flex"} alignItems={"center"}>
         <Typography flexGrow={1}>All Books</Typography>
-        <Button component={Link} to="/create" variant="outlined">
+        <Button
+          variant="outlined"
+          onClick={() => setEditModal({ ...editModal, opened: true })}
+        >
           add
         </Button>
       </Box>
@@ -88,6 +104,11 @@ function List() {
           </Table>
         </TableContainer>{" "}
       </Box>
+      {editModal.opened && (
+        <EditModal
+          handleClose={() => setEditModal({ ...editModal, opened: false })}
+        />
+      )}
     </Box>
   );
 }
