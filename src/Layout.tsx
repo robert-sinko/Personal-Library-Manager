@@ -1,9 +1,14 @@
-import { AppBar, Box, Grid, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
 
 export default function Layout() {
   return (
-    <Box display={"flex"} flexDirection={"column"}>
+    <Box
+      display={"flex"}
+      flexDirection={"column"}
+      minHeight={"100vh"}
+      alignItems={"center"}
+    >
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" flexGrow={1}>
@@ -13,20 +18,19 @@ export default function Layout() {
       </AppBar>
       <Box
         component="main"
+        m={2}
+        display="flex"
         flexGrow={1}
-        height={1}
-        sx={{ background: "#fafafa" }}
+        maxWidth="md"
+        width="100%"
+        sx={{
+          background: "#fafafa",
+        }}
       >
-        <Box
-          height={1}
-          sx={{
-            padding: "0 3rem 3rem 3rem",
-          }}
-        >
-          <Grid container maxWidth="md" marginX={"auto"} paddingTop={2}>
-            <Outlet />
-          </Grid>
-        </Box>
+        <Outlet />
+      </Box>
+      <Box>
+        <Typography p={3}>Coded by Robert</Typography>
       </Box>
     </Box>
   );
